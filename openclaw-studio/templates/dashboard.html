@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw Studio - Agent管理工作室</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                <span>OpenClaw Studio</span>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#dashboard" class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>控制面板</span>
+                </a>
+                <a href="#agents" class="nav-item" data-page="agents">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Agent管理</span>
+                </a>
+                <a href="#browser" class="nav-item" data-page="browser">
+                    <i class="fas fa-globe"></i>
+                    <span>浏览器自动化</span>
+                </a>
+                <a href="#pixel" class="nav-item" data-page="pixel">
+                    <i class="fas fa-paint-brush"></i>
+                    <span>像素工作室</span>
+                </a>
+                <a href="#tasks" class="nav-item" data-page="tasks">
+                    <i class="fas fa-tasks"></i>
+                    <span>任务队列</span>
+                </a>
+                <a href="#logs" class="nav-item" data-page="logs">
+                    <i class="fas fa-file-alt"></i>
+                    <span>系统日志</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="status-dot online"></span>
+                    <span>系统运行中</span>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部栏 -->
+            <header class="header">
+                <h1 id="page-title">控制面板</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="refreshData()">
+                        <i class="fas fa-sync-alt"></i> 刷新
+                    </button>
+                </div>
+            </header>
+            
+            <!-- 页面内容 -->
+            <div class="content-area">
+                <!-- 控制面板页 -->
+                <div id="page-dashboard" class="page active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="total-agents">6</h3>
+                                <p>活跃Agent</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="completed-tasks">0</h3>
+                                <p>已完成任务</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon orange">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="pending-tasks">0</h3>
+                                <p>待处理任务</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon purple">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="browser-status">就绪</h3>
+                                <p>浏览器状态</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-sections">
+                        <div class="section">
+                            <h2>快速操作</h2>
+                            <div class="quick-actions">
+                                <button class="action-card" onclick="showCreateTaskModal()">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span>创建任务</span>
+                                </button>
+                                <button class="action-card" onclick="navigateTo('browser')">
+                                    <i class="fas fa-camera"></i>
+                                    <span>网页截图</span>
+                                </button>
+                                <button class="action-card" onclick="navigateTo('pixel')">
+                                    <i class="fas fa-palette"></i>
+                                    <span>生成像素画</span>
+                                </button>
+                                <button class="action-card" onclick="navigateTo('agents')">
+                                    <i class="fas fa-users"></i>
+                                    <span>管理Agent</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h2>最近日志</h2>
+                            <div class="log-container" id="recent-logs">
+                                <div class="log-entry">
+                                    <span class="log-time">--:--:--</span>
+                                    <span class="log-message">系统启动中...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Agent管理页 -->
+                <div id="page-agents" class="page">
+                    <div class="agents-grid" id="agents-list">
+                        <!-- Agent卡片将由JS动态生成 -->
+                    </div>
+                </div>
+                
+                <!-- 浏览器自动化页 -->
+                <div id="page-browser" class="page">
+                    <div class="browser-tools">
+                        <div class="tool-section">
+                            <h2>网页截图</h2>
+                            <div class="form-group">
+                                <label>目标网址</label>
+                                <input type="url" id="screenshot-url" placeholder="https://www.example.com" value="https://www.zhihu.com">
+                            </div>
+                            <button class="btn btn-primary" onclick="takeScreenshot()">
+                                <i class="fas fa-camera"></i> 截图
+                            </button>
+                            <div id="screenshot-result" class="result-area"></div>
+                        </div>
+                        
+                        <div class="tool-section">
+                            <h2>网页内容提取</h2>
+                            <div class="form-group">
+                                <label>目标网址</label>
+                                <input type="url" id="extract-url" placeholder="https://www.example.com">
+                            </div>
+                            <button class="btn btn-primary" onclick="extractContent()">
+                                <i class="fas fa-download"></i> 提取内容
+                            </button>
+                            <div id="extract-result" class="result-area"></div>
+                        </div>
+                        
+                        <div class="tool-section">
+                            <h2>浏览器导航</h2>
+                            <div class="form-group">
+                                <label>目标网址</label>
+                                <input type="url" id="navigate-url" placeholder="https://www.example.com">
+                            </div>
+                            <div class="form-group">
+                                <label>操作</label>
+                                <select id="navigate-action">
+                                    <option value="goto">访问页面</option>
+                                    <option value="click">点击元素</option>
+                                    <option value="type">输入文字</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>元素选择器（如需要）</label>
+                                <input type="text" id="navigate-selector" placeholder="button:has-text('登录')">
+                            </div>
+                            <div class="form-group">
+                                <label>输入文字（如需要）</label>
+                                <input type="text" id="navigate-text" placeholder="要输入的文字">
+                            </div>
+                            <button class="btn btn-primary" onclick="navigateBrowser()">
+                                <i class="fas fa-play"></i> 执行操作
+                            </button>
+                            <div id="navigate-result" class="result-area"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 像素工作室页 -->
+                <div id="page-pixel" class="page">
+                    <div class="pixel-studio">
+                        <div class="tool-section">
+                            <h2><i class="fas fa-paint-brush"></i> 像素艺术生成器</h2>
+                            
+                            <div class="form-group">
+                                <label>描述</label>
+                                <textarea id="pixel-prompt" rows="3" placeholder="描述你想要的像素艺术，例如：勇敢的骑士，红色盔甲，持剑站立"></textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>风格</label>
+                                    <select id="pixel-style">
+                                        <option value="8-bit">8-bit 经典</option>
+                                        <option value="16-bit">16-bit 精美</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>尺寸</label>
+                                    <select id="pixel-size">
+                                        <option value="512">512x512</option>
+                                        <option value="1024">1024x1024</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary btn-large" onclick="generatePixelArt()">
+                                <i class="fas fa-magic"></i> 生成像素艺术
+                            </button>
+                            
+                            <div id="pixel-result" class="result-area">
+                                <div class="placeholder">
+                                    <i class="fas fa-image"></i>
+                                    <p>生成的像素艺术将显示在这里</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="templates-section">
+                            <h3>快速模板</h3>
+                            <div class="template-buttons">
+                                <button class="template-btn" onclick="setPixelTemplate('character')">🎮 游戏角色</button>
+                                <button class="template-btn" onclick="setPixelTemplate('scene')">🌄 场景</button>
+                                <button class="template-btn" onclick="setPixelTemplate('item')">🗡️ 道具</button>
+                                <button class="template-btn" onclick="setPixelTemplate('icon')">🎨 图标</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 任务队列页 -->
+                <div id="page-tasks" class="page">
+                    <div class="tasks-header">
+                        <h2>任务队列</h2>
+                        <button class="btn btn-primary" onclick="showCreateTaskModal()">
+                            <i class="fas fa-plus"></i> 新建任务
+                        </button>
+                    </div>
+                    <div class="tasks-list" id="tasks-container">
+                        <!-- 任务列表将由JS动态生成 -->
+                    </div>
+                </div>
+                
+                <!-- 系统日志页 -->
+                <div id="page-logs" class="page">
+                    <div class="logs-header">
+                        <h2>系统日志</h2>
+                        <button class="btn btn-secondary" onclick="clearLogs()">
+                            <i class="fas fa-trash"></i> 清空日志
+                        </button>
+                    </div>
+                    <div class="logs-container" id="logs-container">
+                        <!-- 日志将由JS动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 创建任务模态框 -->
+    <div id="create-task-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>创建新任务</h3>
+                <button class="close-btn" onclick="closeCreateTaskModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>任务类型</label>
+                    <select id="task-type">
+                        <option value="research">调研分析</option>
+                        <option value="code">代码开发</option>
+                        <option value="design">设计创作</option>
+                        <option value="writing">文案撰写</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>分配给Agent</label>
+                    <select id="task-agent">
+                        <option value="coding-agent">编程Agent</option>
+                        <option value="frontend-design-agent">设计Agent</option>
+                        <option value="legal-agent">法律Agent</option>
+                        <option value="customer-service-agent">客服Agent</option>
+                        <option value="finance-agent">财务Agent</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>任务描述</label>
+                    <textarea id="task-description" rows="3" placeholder="详细描述任务内容..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCreateTaskModal()">取消</button>
+                <button class="btn btn-primary" onclick="createTask()">创建任务</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
