@@ -1,0 +1,14 @@
+{
+  "163": {
+    "smtp_server": "smtp.163.com",
+    "smtp_port": 25,
+    "username": "18112943563@163.com",
+    "password": "SLiDJrZxfH9K2QUv"
+  },
+  "outlook": {
+    "smtp_server": "smtp.office365.com",
+    "smtp_port": 587,
+    "username": "jinghao1026@outlook.com",
+    "password": "clock369"
+  }
+}
